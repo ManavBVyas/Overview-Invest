@@ -1,0 +1,17 @@
+{
+    "name": "overview-theme",
+    "version": "1.0.0",
+    "description": "The premium Cyberpunk/Glassmorphism theme for Overview Invest projects",
+    "main": "index.css",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "theme",
+        "css",
+        "glassmorphism",
+        "dark-mode"
+    ],
+    "author": "Antigravity",
+    "license": "ISC"
+}

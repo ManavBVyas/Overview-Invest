@@ -1,0 +1,12 @@
+{
+    "name": "overview-invest-manager",
+    "version": "1.0.0",
+    "description": "Secure Control Center for Overview Invest V5",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron ."
+    },
+    "dependencies": {
+        "electron": "^31.0.0"
+    }
+}

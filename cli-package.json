@@ -1,0 +1,16 @@
+{
+  "name": "overview-invest-cli",
+  "version": "1.0.0",
+  "description": "Overview Invest Service Manager CLI with arrow key navigation",
+  "main": "cli-interactive.js",
+  "scripts": {
+    "setup": "npm install"
+  },
+  "dependencies": {
+    "inquirer": "^8.2.5",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "axios": "^1.6.0",
+    "cli-table3": "^0.6.3"
+  }
+}
