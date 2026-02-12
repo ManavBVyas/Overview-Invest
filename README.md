@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # 💸 Overview Invest
+=======
+# 💸 Overview Invest V5
+>>>>>>> 477a230 (Cleanup: Removed task-specific markdown files and added professional README.md)
 **The Ultimate Real-Time Trading Simulation Platform**
 
 Overview Invest is a high-performance, premium web application designed for stock market enthusiasts. It provides a risk-free environment to track real-time market trends, execute trades, and compete with other traders on a global leaderboard.
@@ -39,4 +43,37 @@ Overview Invest is a high-performance, premium web application designed for stoc
 
 1. **Clone the repo**:
    ```bash
+<<<<<<< HEAD
    git clone [https://github.com/ManavVas07/Overview_Invest_V5.git](https://github.com/ManavVas07/Overview_Invest_V5.git)
+=======
+   git clone https://github.com/ManavBVyas/Overview-Invest.git
+   ```
+
+2. **Install Dependencies**:
+   ```bash
+   # Root directory
+   npm install
+   # Client directory
+   cd client && npm install
+   # Server directory
+   cd ../server && npm install
+   ```
+
+3. **Environment Setup**:
+   Create a `.env` file in the `/server` directory with:
+   - `JWT_SECRET`
+   - `MONGO_URI`
+   - `FINNHUB_API_KEY` (or chosen market provider)
+
+4. **Run the App**:
+   ```bash
+   ./START_ALL.bat
+   ```
+
+---
+
+## 🛡 License
+Distributed under the MIT License. See `LICENSE` for more information.
+
+**Built by [Manav](https://github.com/ManavBVyas)** 🚀
+>>>>>>> 477a230 (Cleanup: Removed task-specific markdown files and added professional README.md)
