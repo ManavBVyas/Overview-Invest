@@ -157,17 +157,18 @@ const VerificationService = {
       doc.fontSize(9)
         .fillColor(textColor)
         .font('Helvetica')
-        .text('Mumbai, Maharashtra, India', 50, currentY);
+        .text('Keshod, Junagadh, Gujarat, India', 50, currentY);
 
       currentY += 12;
       doc.text('Email: support@overviewinvest.com', 50, currentY);
 
       currentY += 12;
-      doc.text('Phone: +91 98765 43210', 50, currentY);
+      doc.text('Phone: +91 63519 41238', 50, currentY);
 
       // Right side - Invoice Details
       let rightY = 150;
-      const rightX = 350;
+      const rightX = 300; // Moved left to give more space
+      const valueX = 420; // Explicit column for values
 
       doc.fontSize(10)
         .fillColor('#64748b')
@@ -178,8 +179,10 @@ const VerificationService = {
         .fillColor(textColor)
         .font('Helvetica-Bold')
         .text('Invoice Number:', rightX, rightY);
+
+      // Handle potentially long ID
       doc.font('Helvetica')
-        .text(`#${data.order_id}`, rightX + 100, rightY);
+        .text(`${data.order_id}`, valueX, rightY, { width: 130, align: 'right' });
 
       rightY += 15;
       doc.font('Helvetica-Bold')
@@ -189,13 +192,13 @@ const VerificationService = {
           day: '2-digit',
           month: 'short',
           year: 'numeric'
-        }), rightX + 100, rightY);
+        }), valueX, rightY, { width: 130, align: 'right' });
 
       rightY += 15;
       doc.font('Helvetica-Bold')
         .text('Status:', rightX, rightY);
       doc.fillColor(accentColor)
-        .text('PAID', rightX + 100, rightY);
+        .text('PAID', valueX, rightY, { width: 130, align: 'right' });
 
       // ============ CUSTOMER INFO ============
       currentY = 270;
@@ -241,13 +244,22 @@ const VerificationService = {
 
       currentY += 35;
 
+      // Exchange Rate (Approximate)
+      const EXCHANGE_RATE = 87.50; // USD to INR
+      const isINR = data.currency === 'INR';
+      const multiplier = isINR ? 1 : EXCHANGE_RATE;
+
       // Table items
       let subtotal = 0;
       doc.font('Helvetica').fillColor(textColor).fontSize(9);
 
       data.items.forEach((item, index) => {
-        const qty = item.quantity || 1;
-        const price = parseFloat(item.price || 0);
+        const qty = parseFloat(item.quantity || 1);
+        let price = parseFloat(item.price || 0);
+
+        // Convert to INR if needed
+        price = price * multiplier;
+
         const total = qty * price;
         subtotal += total;
 
@@ -260,8 +272,8 @@ const VerificationService = {
         doc.fillColor(textColor)
           .text(item.name || item.description || 'Item', 60, currentY, { width: 200 })
           .text(qty.toString(), 280, currentY, { width: 50, align: 'center' })
-          .text(`₹${price.toFixed(2)}`, 350, currentY, { width: 80, align: 'right' })
-          .text(`₹${total.toFixed(2)}`, 450, currentY, { width: 90, align: 'right' });
+          .text(`Rs. ${price.toFixed(2)}`, 350, currentY, { width: 80, align: 'right' })
+          .text(`Rs. ${total.toFixed(2)}`, 450, currentY, { width: 90, align: 'right' });
 
         currentY += 25;
       });
@@ -282,7 +294,7 @@ const VerificationService = {
         .fillColor(textColor)
         .font('Helvetica')
         .text('Subtotal:', 400, currentY, { width: 90, align: 'left' })
-        .text(`₹${subtotal.toFixed(2)}`, 450, currentY, { width: 90, align: 'right' });
+        .text(`Rs. ${subtotal.toFixed(2)}`, 450, currentY, { width: 90, align: 'right' });
 
       currentY += 20;
 
@@ -290,12 +302,14 @@ const VerificationService = {
       const tax = subtotal * 0; // 0% tax for now
       if (tax > 0) {
         doc.text('Tax (18%):', 400, currentY, { width: 90, align: 'left' })
-          .text(`₹${tax.toFixed(2)}`, 450, currentY, { width: 90, align: 'right' });
+          .text(`Rs. ${tax.toFixed(2)}`, 450, currentY, { width: 90, align: 'right' });
         currentY += 20;
       }
 
       // Total - highlighted
-      const totalAmount = parseFloat(data.amount || subtotal);
+      // Recalculate totalAmount strictly from subtotal + tax to ensure consistency with invoice items
+      const totalAmount = subtotal + tax;
+
       doc.rect(350, currentY - 5, 195, 35)
         .fill(primaryColor);
 
@@ -303,7 +317,7 @@ const VerificationService = {
         .fillColor('#ffffff')
         .font('Helvetica-Bold')
         .text('TOTAL:', 360, currentY + 5, { width: 90, align: 'left' })
-        .text(`₹${totalAmount.toFixed(2)}`, 450, currentY + 5, { width: 90, align: 'right' });
+        .text(`Rs. ${totalAmount.toFixed(2)}`, 450, currentY + 5, { width: 90, align: 'right' });
 
       // ============ FOOTER ============
       const footerY = doc.page.height - 100;
@@ -403,7 +417,7 @@ const VerificationService = {
 
                   <div class="total">
                     <div style="font-size: 14px; opacity: 0.9;">Total Amount Paid</div>
-                    <div class="amount">₹${parseFloat(data.amount).toFixed(2)}</div>
+                    <div class="amount">Rs. ${parseFloat(totalAmount).toFixed(2)}</div>
                   </div>
 
                   <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin-top: 30px;">
@@ -411,13 +425,13 @@ const VerificationService = {
                   </p>
 
                   <center>
-                    <a href="mailto:support@overviewinvest.com" class="button">Contact Support</a>
+                    <a href="mailto:overviewinvest.dev@gmail.com" class="button">Contact Support</a>
                   </center>
                 </div>
                 <div class="footer">
                   <p><strong>Overview Invest Pvt. Ltd.</strong></p>
-                  <p>Mumbai, Maharashtra, India</p>
-                  <p>Email: <a href="mailto:support@overviewinvest.com">support@overviewinvest.com</a> | Phone: +91 98765 43210</p>
+                  <p>Keshod, Junagadh, Gujarat, India</p>
+                  <p>Email: <a href="mailto:overviewinvest.dev@gmail.com">overviewinvest.dev@gmail.com</a> | Phone: +91 63519 41238</p>
                   <p style="margin-top: 20px; font-size: 11px; color: #94a3b8;">
                     This is an automated email. Please do not reply to this message.
                   </p>
@@ -450,5 +464,6 @@ const VerificationService = {
     }
   }
 };
+
 
 module.exports = VerificationService;

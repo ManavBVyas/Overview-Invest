@@ -17,7 +17,6 @@ const Stock = require('./models/Stock');
 const Transaction = require('./models/Transaction');
 const Order = require('./models/Order');
 const FinnhubMarketService = require('./services/FinnhubMarketService');
-const Complaint = require('./models/Complaint');
 
 // Admin Routes
 const adminRoutes = require('./routes/admin');
@@ -545,108 +544,8 @@ app.get('/api/stocks/prices', async (req, res) => {
     }
 });
 
-app.get('/api/admin/users', auth, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' });
-    try {
-        const users = await User.find().sort({ created_at: -1 }).select('email role is_active created_at');
-        res.json(users);
-    } catch (e) {
-        res.status(500).json({ message: e.message });
-    }
-});
-
-app.post('/api/admin/users/toggle', auth, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' });
-    const { userId, status } = req.body;
-    try {
-        await User.findByIdAndUpdate(userId, { is_active: status });
-        res.json({ message: 'User status updated' });
-    } catch (e) {
-        res.status(500).json({ message: e.message });
-    }
-});
-
-// --- Analytics Routes (Admin Only) ---
-
-const analytics = require('./analytics');
-
-app.get('/api/admin/analytics/platform-stats', auth, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' });
-    await analytics.getPlatformStats(req, res);
-});
-
-app.get('/api/admin/analytics/user-growth', auth, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' });
-    await analytics.getUserGrowth(req, res);
-});
-
-app.get('/api/admin/analytics/trading-activity', auth, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' });
-    await analytics.getTradingActivity(req, res);
-});
-
-app.get('/api/admin/analytics/top-stocks', auth, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' });
-    await analytics.getTopStocks(req, res);
-});
-
-app.get('/api/admin/analytics/portfolio-distribution', auth, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' });
-    await analytics.getPortfolioDistribution(req, res);
-});
-
-app.get('/api/admin/analytics/active-users', auth, async (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' });
-    await analytics.getMostActiveUsers(req, res);
-});
-
-
 // ==================== ADMIN ROUTES ====================
 app.use('/api/admin', adminRoutes);
-
-// ==================== USER COMPLAINTS/SUGGESTIONS ====================
-
-// Submit Complaint or Suggestion
-app.post('/api/complaint', auth, async (req, res) => {
-    try {
-        const { type, subject, message } = req.body;
-
-        if (!type || !subject || !message) {
-            return res.status(400).json({ message: 'Type, subject, and message are required' });
-        }
-
-        if (!['complaint', 'suggestion'].includes(type)) {
-            return res.status(400).json({ message: 'Type must be either complaint or suggestion' });
-        }
-
-        const complaint = await Complaint.create({
-            userId: req.user.id,
-            type,
-            subject,
-            message
-        });
-
-        res.status(201).json({
-            message: `${type === 'complaint' ? 'Complaint' : 'Suggestion'} submitted successfully`,
-            complaint
-        });
-    } catch (err) {
-        console.error('Submit complaint error:', err);
-        res.status(500).json({ message: 'Failed to submit' });
-    }
-});
-
-// Get User's Own Complaints/Suggestions
-app.get('/api/my-complaints', auth, async (req, res) => {
-    try {
-        const complaints = await Complaint.find({ userId: req.user.id })
-            .sort({ createdAt: -1 });
-        res.json(complaints);
-    } catch (err) {
-        console.error('Get complaints error:', err);
-        res.status(500).json({ message: 'Failed to fetch complaints' });
-    }
-});
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

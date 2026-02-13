@@ -18,7 +18,6 @@ const RANKS = [
 
 export default function Account() {
     const [user, setUser] = useState(null);
-    const [stats, setStats] = useState(null);
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [totalWealth, setTotalWealth] = useState(0);
@@ -36,15 +35,13 @@ export default function Account() {
                 }
 
                 const config = { headers: { Authorization: `Bearer ${token}` } };
-                const [portfolioRes, txnRes, statsRes] = await Promise.all([
+                const [portfolioRes, txnRes] = await Promise.all([
                     axios.get('http://localhost:5000/api/user/portfolio', config),
-                    axios.get('http://localhost:5000/api/user/transactions', config),
-                    axios.get('http://localhost:5000/api/quick-trade/stats', config)
+                    axios.get('http://localhost:5000/api/user/transactions', config)
                 ]);
 
                 setUser(portfolioRes.data);
                 setTransactions(txnRes.data);
-                setStats(statsRes.data);
 
                 // Calculate Total Wealth: Balance + Sum(holdings * current_price)
                 const portfolioValue = portfolioRes.data.holdings?.reduce((sum, h) => {
@@ -157,18 +154,10 @@ export default function Account() {
                         <RankCard totalWealth={totalWealth} />
 
                         {/* Financial Stats */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
                             <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #38bdf8' }}>
                                 <p style={{ color: '#94a3b8', margin: '0 0 0.5rem 0' }}>Total Balance</p>
                                 <h2 style={{ margin: 0 }}>${user?.balance.toFixed(2)}</h2>
-                            </div>
-                            <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #4ade80' }}>
-                                <p style={{ color: '#94a3b8', margin: '0 0 0.5rem 0' }}>Net Profit</p>
-                                <h2 style={{ margin: 0, color: '#4ade80' }}>+${stats?.net_profit || '0.00'}</h2>
-                            </div>
-                            <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #fbbf24' }}>
-                                <p style={{ color: '#94a3b8', margin: '0 0 0.5rem 0' }}>Win Rate</p>
-                                <h2 style={{ margin: 0, color: '#fbbf24' }}>{stats?.win_rate || '0'}%</h2>
                             </div>
                         </div>
 

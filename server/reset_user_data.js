@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const User = require('./models/User');
 const Transaction = require('./models/Transaction');
 const Order = require('./models/Order');
-const QuickTrade = require('./models/QuickTrade');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
@@ -30,14 +29,6 @@ async function resetUserData() {
         // 3. Clear orders
         console.log('Deleting orders...');
         await Order.deleteMany({});
-
-        // 4. Clear quick trades
-        console.log('Deleting quick trades...');
-        try {
-            await QuickTrade.deleteMany({});
-        } catch (e) {
-            // QuickTrade model might not be registered or collection empty
-        }
 
         console.log('✅ Successfully deleted all shares and reset user accounts.');
 

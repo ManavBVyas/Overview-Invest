@@ -45,7 +45,7 @@ export default function Users() {
 
     const handleViewUser = async (userId) => {
         try {
-            const res = await axios.get(`${API_URL}/users/${userId}`, {});
+            const res = await axios.get(`${API_URL}/users/${userId}`, { headers });
             setSelectedUser(res.data);
             setModalOpen(true);
         } catch (err) {
@@ -55,7 +55,7 @@ export default function Users() {
 
     const handleActivate = async (userId) => {
         try {
-            await axios.post(`${API_URL}/users/${userId}/activate`, {}, {});
+            await axios.post(`${API_URL}/users/${userId}/activate`, {}, { headers });
             fetchUsers(pagination.page);
             if (modalOpen) setModalOpen(false);
             alert('User activated successfully!');
@@ -66,7 +66,7 @@ export default function Users() {
 
     const handleDeactivate = async (userId) => {
         try {
-            await axios.post(`${API_URL}/users/${userId}/deactivate`, {}, {});
+            await axios.post(`${API_URL}/users/${userId}/deactivate`, {}, { headers });
             fetchUsers(pagination.page);
             if (modalOpen) setModalOpen(false);
             alert('User deactivated successfully!');
@@ -77,7 +77,7 @@ export default function Users() {
 
     const handleDelete = async (userId) => {
         try {
-            await axios.delete(`${API_URL}/users/${userId}`, {});
+            await axios.delete(`${API_URL}/users/${userId}`, { headers });
             fetchUsers(pagination.page);
             setConfirmModal({ open: false, action: null, user: null });
             if (modalOpen) setModalOpen(false);

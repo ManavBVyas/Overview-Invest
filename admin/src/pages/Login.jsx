@@ -6,6 +6,7 @@ const API_URL = 'http://localhost:5000/api/admin';
 
 export default function Login() {
     const [email, setEmail] = useState('admin@overviewinvest.com');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -16,10 +17,12 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const res = await axios.post(`${API_URL}/login`, { email });
+            console.log('Attempting login with:', email);
+            const res = await axios.post(`${API_URL}/login`, { email, password });
             sessionStorage.setItem('adminToken', res.data.token);
             navigate('/dashboard');
         } catch (err) {
+            console.error('Login error:', err);
             setError(err.response?.data?.message || 'Login failed. Please try again.');
         } finally {
             setLoading(false);
@@ -48,13 +51,24 @@ export default function Login() {
                         />
                     </div>
 
+                    <div className="form-group">
+                        <label>Password</label>
+                        <input
+                            type="password"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+
                     <button type="submit" className="login-btn" disabled={loading}>
                         {loading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
 
                 <div style={{ marginTop: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    <p>Enter admin email to access the panel</p>
+                    <p>Enter admin credentials to access the panel</p>
                 </div>
             </div>
         </div>

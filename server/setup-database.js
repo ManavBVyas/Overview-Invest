@@ -14,7 +14,6 @@ const bcrypt = require('bcryptjs');
 const User = require('./models/User');
 const Stock = require('./models/Stock');
 const Transaction = require('./models/Transaction');
-const Complaint = require('./models/Complaint');
 
 // Database connection string
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/overview_invest_v5';
@@ -180,46 +179,7 @@ function createSampleTransactions(users) {
     return transactions;
 }
 
-// Sample Complaints
-function createSampleComplaints(users) {
-    const activeUsers = users.filter(u => u.status === 'active');
 
-    return [
-        {
-            userId: activeUsers[0]._id,
-            type: 'complaint',
-            subject: 'Order execution delay',
-            message: 'My buy orders are taking too long to execute during market hours.',
-            status: 'pending',
-            priority: 'high'
-        },
-        {
-            userId: activeUsers[1]._id,
-            type: 'suggestion',
-            subject: 'Add more stocks',
-            message: 'Please add more mid-cap and small-cap stocks to the platform.',
-            status: 'reviewed',
-            priority: 'low'
-        },
-        {
-            userId: activeUsers[2]._id,
-            type: 'complaint',
-            subject: 'Chart loading issues',
-            message: 'TradingView charts sometimes fail to load properly.',
-            status: 'pending',
-            priority: 'medium'
-        },
-        {
-            userId: activeUsers[0]._id,
-            type: 'suggestion',
-            subject: 'F&O Trading',
-            message: 'Please add Futures and Options trading feature.',
-            status: 'resolved',
-            priority: 'medium',
-            adminResponse: 'Thank you! F&O trading is planned for our next major update.'
-        }
-    ];
-}
 
 // ============== MAIN SETUP FUNCTION ==============
 
@@ -237,7 +197,7 @@ async function setupDatabase() {
 
         // Drop existing collections
         console.log('🗑️  Clearing existing data...');
-        const collections = ['users', 'stocks', 'transactions', 'complaints', 'news', 'otps', 'stockpricehistories', 'orders', 'quicktrades', 'marketmanipulations'];
+        const collections = ['users', 'stocks', 'transactions', 'news', 'otps', 'stockpricehistories', 'orders', 'marketmanipulations'];
 
         for (const collection of collections) {
             try {
@@ -266,21 +226,14 @@ async function setupDatabase() {
         await Transaction.insertMany(transactionsData);
         console.log(`   ✓ Created ${transactionsData.length} transactions\n`);
 
-        // Create Complaints
-        console.log('💬 Creating sample complaints...');
-        const complaintsData = createSampleComplaints(users);
-        await Complaint.insertMany(complaintsData);
-        console.log(`   ✓ Created ${complaintsData.length} complaints\n`);
-
         // Summary
         console.log('╔══════════════════════════════════════════════════════════╗');
         console.log('║     DATABASE SETUP COMPLETE! (INDIAN MARKET)             ║');
         console.log('╠══════════════════════════════════════════════════════════╣');
         console.log('║                                                          ║');
-        console.log(`║  � NSE Stocks:   ${stocksData.length.toString().padEnd(38)}║`);
+        console.log(`║  📈 NSE Stocks:   ${stocksData.length.toString().padEnd(38)}║`);
         console.log(`║  👥 Users:        ${users.length.toString().padEnd(38)}║`);
         console.log(`║  💰 Transactions: ${transactionsData.length.toString().padEnd(38)}║`);
-        console.log(`║  💬 Complaints:   ${complaintsData.length.toString().padEnd(38)}║`);
         console.log('║                                                          ║');
         console.log('╠══════════════════════════════════════════════════════════╣');
         console.log('║  Demo User Credentials (Currency: INR):                  ║');

@@ -8,7 +8,6 @@ import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import StockDetail from './pages/StockDetail';
-import Support from './pages/Support';
 import Account from './pages/Account';
 import Settings from './pages/Settings';
 import Portfolio from './pages/Portfolio';
@@ -43,7 +42,6 @@ function AppContent() {
         <Route path="/account" element={<Account />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/portfolio" element={<Portfolio />} />
-        <Route path="/support" element={<Support />} />
         <Route path="/rank-showcase" element={<RankShowcase />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminDashboard />} />

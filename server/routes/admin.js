@@ -3,7 +3,6 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
-const Complaint = require('../models/Complaint');
 const Stock = require('../models/Stock');
 
 // Admin credentials from environment
@@ -67,9 +66,12 @@ router.post('/login', async (req, res) => {
 });
 
 // Verify Admin Token
-router.get('/verify', (req, res) => {
+router.get('/verify', adminAuth, (req, res) => {
     res.json({ valid: true, admin: req.admin });
 });
+
+// Apply auth middleware to all routes below
+router.use(adminAuth);
 
 // ==================== DASHBOARD STATS ====================
 
@@ -111,11 +113,6 @@ router.get('/stats', async (req, res) => {
         ]);
         const totalBalance = balanceAgg[0]?.total || 0;
 
-        // Complaint stats
-        const totalComplaints = await Complaint.countDocuments({ type: 'complaint' });
-        const totalSuggestions = await Complaint.countDocuments({ type: 'suggestion' });
-        const pendingComplaints = await Complaint.countDocuments({ status: 'pending' });
-
         // Stock stats
         const totalStocks = await Stock.countDocuments();
 
@@ -136,11 +133,6 @@ router.get('/stats', async (req, res) => {
             balance: {
                 total: totalBalance,
                 average: totalUsers > 0 ? totalBalance / totalUsers : 0
-            },
-            complaints: {
-                total: totalComplaints,
-                suggestions: totalSuggestions,
-                pending: pendingComplaints
             },
             stocks: {
                 total: totalStocks
@@ -274,11 +266,7 @@ router.get('/users/:id', async (req, res) => {
             .sort({ createdAt: -1 })
             .limit(20);
 
-        // Get user's complaints
-        const complaints = await Complaint.find({ userId: user._id })
-            .sort({ createdAt: -1 });
-
-        res.json({ user, transactions, complaints });
+        res.json({ user, transactions });
     } catch (error) {
         console.error('Get user error:', error);
         res.status(500).json({ message: 'Failed to fetch user' });
@@ -336,9 +324,6 @@ router.delete('/users/:id', async (req, res) => {
         // Delete user's transactions
         await Transaction.deleteMany({ userId: user._id });
 
-        // Delete user's complaints
-        await Complaint.deleteMany({ userId: user._id });
-
         // Delete user
         await User.findByIdAndDelete(req.params.id);
 
@@ -349,105 +334,33 @@ router.delete('/users/:id', async (req, res) => {
     }
 });
 
-// ==================== COMPLAINTS & SUGGESTIONS ====================
+// ==================== ANALYTICS ====================
 
-// Get All Complaints/Suggestions
-router.get('/complaints', async (req, res) => {
-    try {
-        const { type, status, page = 1, limit = 20 } = req.query;
+const analytics = require('../analytics');
 
-        let query = {};
-
-        if (type && type !== 'all') {
-            query.type = type;
-        }
-
-        if (status && status !== 'all') {
-            query.status = status;
-        }
-
-        const total = await Complaint.countDocuments(query);
-        const complaints = await Complaint.find(query)
-            .populate('userId', 'username email')
-            .sort({ createdAt: -1 })
-            .skip((page - 1) * limit)
-            .limit(parseInt(limit));
-
-        res.json({
-            complaints,
-            pagination: {
-                total,
-                page: parseInt(page),
-                pages: Math.ceil(total / limit)
-            }
-        });
-    } catch (error) {
-        console.error('Get complaints error:', error);
-        res.status(500).json({ message: 'Failed to fetch complaints' });
-    }
+router.get('/analytics/platform-stats', async (req, res) => {
+    await analytics.getPlatformStats(req, res);
 });
 
-// Get Single Complaint
-router.get('/complaints/:id', async (req, res) => {
-    try {
-        const complaint = await Complaint.findById(req.params.id)
-            .populate('userId', 'username email createdAt status');
-
-        if (!complaint) {
-            return res.status(404).json({ message: 'Complaint not found' });
-        }
-
-        res.json(complaint);
-    } catch (error) {
-        console.error('Get complaint error:', error);
-        res.status(500).json({ message: 'Failed to fetch complaint' });
-    }
+router.get('/analytics/user-growth', async (req, res) => {
+    await analytics.getUserGrowth(req, res);
 });
 
-// Update Complaint Status
-router.patch('/complaints/:id', async (req, res) => {
-    try {
-        const { status, adminResponse, priority } = req.body;
-
-        const updateData = { updatedAt: new Date() };
-        if (status) updateData.status = status;
-        if (adminResponse !== undefined) updateData.adminResponse = adminResponse;
-        if (priority) updateData.priority = priority;
-
-        const complaint = await Complaint.findByIdAndUpdate(
-            req.params.id,
-            updateData,
-            { new: true }
-        ).populate('userId', 'username email');
-
-        if (!complaint) {
-            return res.status(404).json({ message: 'Complaint not found' });
-        }
-
-        res.json({ message: 'Complaint updated successfully', complaint });
-    } catch (error) {
-        console.error('Update complaint error:', error);
-        res.status(500).json({ message: 'Failed to update complaint' });
-    }
+router.get('/analytics/trading-activity', async (req, res) => {
+    await analytics.getTradingActivity(req, res);
 });
 
-// Delete Complaint
-router.delete('/complaints/:id', async (req, res) => {
-    try {
-        const complaint = await Complaint.findByIdAndDelete(req.params.id);
+router.get('/analytics/top-stocks', async (req, res) => {
+    await analytics.getTopStocks(req, res);
+});
 
-        if (!complaint) {
-            return res.status(404).json({ message: 'Complaint not found' });
-        }
+router.get('/analytics/portfolio-distribution', async (req, res) => {
+    await analytics.getPortfolioDistribution(req, res);
+});
 
-        res.json({ message: 'Complaint deleted successfully' });
-    } catch (error) {
-        console.error('Delete complaint error:', error);
-        res.status(500).json({ message: 'Failed to delete complaint' });
-    }
+router.get('/analytics/active-users', async (req, res) => {
+    await analytics.getMostActiveUsers(req, res);
 });
 
 module.exports = router;
-
-
 
